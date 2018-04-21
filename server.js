@@ -11,7 +11,7 @@ var app = express();
 app.use(express.static("public"));
 // Database configuration
 var databaseUrl = "articles";
-var collections = ["scrapedArtciles"];
+var collections = ["scrapedData"];
 
 // Hook mongojs configuration to the db variable
 var db = mongojs(databaseUrl, collections);
@@ -47,7 +47,7 @@ app.get("/scrape", function(req, res) {
     // For each element with a "title" class
     $("h2.truncate").each(function(i, element) {
       // Save the text and href of each link enclosed in the current element
-      var title = $(element).children("a").text();
+      var title = $(element).children("h2").text();
       var link = $(element).children("a").attr("href");
 
       // If this found element had both a title and a link

@@ -1,10 +1,10 @@
-function displayResults(articles) {
+function displayResults(scrapedData) {
 
   // For each entry of that json...
-  scrapedArticles.forEach(function(article) {
+  scrapedData.forEach(function(article) {
     // Append each of the articles to the div
-    $("#display").append("<p>" + scrapedArticles.title + "</p>"
-                         "<p>" + scrapedArticles.link + "</p>"
+    $("#display").append("<p>" + scrapedData.title + "</p>" + 
+                         "<p>" + scrapedData.link + "</p>" + 
                          "<button class='btn btn-secondary'>SAVE</button");
   });
 }
