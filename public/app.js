@@ -4,7 +4,8 @@ function displayResults(articles) {
   scrapedArticles.forEach(function(article) {
     // Append each of the articles to the div
     $("#display").append("<p>" + scrapedArticles.title + "</p>"
-                         "<p>" + scrapedArticles.link + "</p>");
+                         "<p>" + scrapedArticles.link + "</p>"
+                         "<button class='btn btn-secondary'>SAVE</button");
   });
 }
 // First thing: ask the back end for json with all articles
@@ -18,8 +19,3 @@ $("#getBtn").on("click", function() {
     displayResults(data);
   });
 });
-
-// $("#toSavedPage").click(function(){
-//     var newURL = "saved.html";
-//               window.location = newURL;
-//   });
