@@ -51,8 +51,8 @@ app.get("/scrape", function(req, res) {
     // For each element with a "title" class
     $("h2.truncate").each(function(i, element) {
       // Save the text and href of each link enclosed in the current element
-      var title = $(element).children("h2").text();
-      var link = $(element).children("a").attr("href");
+      var title = $(this).children("a").text();
+      var link = $(this).children("a").attr("href");
       var modLink = baseUrl + link;
       console.log(modLink);
 
