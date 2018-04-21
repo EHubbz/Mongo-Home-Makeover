@@ -17,7 +17,10 @@ function displayResults(scrapedData) {
 // });
 
 $("#getBtn").on("click", function() {
-  $.getJSON("/all", function(data) {
-    displayResults(data);
+  $.getJSON("/all", function(scrapedData) {
+      console.log(scrapedData);
+
+    displayResults(scrapedData);
       });
+  console.log("clicked");
 });

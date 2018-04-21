@@ -4,6 +4,7 @@ var mongojs = require("mongojs");
 // Require request and cheerio. This makes the scraping possible
 var request = require("request");
 var cheerio = require("cheerio");
+var fs = require("fs");
 
 // Initialize Express
 var app = express();
@@ -28,6 +29,7 @@ app.get("/", function(req, res) {
 app.get("/all", function(req, res) {
   // Find all results from the scrapedData collection in the db
   db.scrapedData.find({}, function(error, found) {
+  
     // Throw any errors to the console
     if (error) {
       console.log(error);
@@ -42,20 +44,24 @@ app.get("/all", function(req, res) {
 app.get("/scrape", function(req, res) {
   // Make a request for the news section of `ycombinator`
   request("https://domino.com/content/design/before-after", function(error, response, html) {
+    // fs.writeFileSync("log.txt", html, "utf8");
     // Load the html body from request into cheerio
     var $ = cheerio.load(html);
+    var baseUrl = "https://domino.com";
     // For each element with a "title" class
     $("h2.truncate").each(function(i, element) {
       // Save the text and href of each link enclosed in the current element
       var title = $(element).children("h2").text();
       var link = $(element).children("a").attr("href");
+      var modLink = baseUrl + link;
+      console.log(modLink);
 
       // If this found element had both a title and a link
-      if (title && link) {
+     
         // Insert the data in the scrapedData db
         db.scrapedData.insert({
           title: title,
-          link: link
+          link: modLink
         },
         function(err, inserted) {
           if (err) {
@@ -67,7 +73,7 @@ app.get("/scrape", function(req, res) {
             console.log(inserted);
           }
         });
-      }
+      
     });
   });
 
