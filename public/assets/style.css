@@ -20,4 +20,11 @@ p {
 #display {
 	border-style: solid;
 	margin: 20px;
+    padding: 10px;
+    font-size: 20px;
+}
+
+#savedDisplay {
+    border-style: solid;
+    margin: 20px;
 }
