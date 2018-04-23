@@ -18,13 +18,23 @@ p {
 }
 
 #display {
-	border-style: solid;
-	margin: 20px;
+	margin: 10px;
     padding: 10px;
-    font-size: 20px;
+    font-size: 15px;
 }
 
-#savedDisplay {
-    border-style: solid;
-    margin: 20px;
+#comments {
+    margin: 10px;
+    padding: 10px;
+    font-size: 15px;
 }
+
+h2 {
+    text-align: center;
+    text-decoration: underline;
+}
+
+.title {
+    font-weight: bold;
+}
+

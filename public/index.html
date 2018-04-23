@@ -5,6 +5,7 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> 
   	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    
   	<link rel="stylesheet" href="https://bootswatch.com/4/lux/bootstrap.min.css">
     <link rel="stylesheet" href="assets/style.css">
   </head>
@@ -13,32 +14,41 @@
   		<h1>MONGO HOME MAKEOVER</h1>
   		<p>ALL THE INSPIRATION YOU NEED.</p>
   		<br>
-  		<a id="homeBtn" class="btn btn-secondary" href="index.html" role="button"><img src="assets/images/mongo.png">HOME</a>
-    	<button id="getBtn" class="btn btn-secondary" role="button"><img src="assets/images/mongo.png">GET ARTICLES</button>
-    	<a id="toSavedPage" class="btn btn-secondary" href="saved.html" role="button"><img src="assets/images/mongo.png">SAVED ARTICLES</a>
+  		<button id="scrapeBtn" class="btn btn-secondary" role="button"><img src="assets/images/mongo.png">SCRAPE</button>
+    	<button id="seeCommentsBtn" class="btn btn-secondary" role="button"><img src="assets/images/mongo.png">VIEW COMMENTS</button>
+    	<button id="savedArticlesBtn" class="btn btn-secondary" role="button"><img src="assets/images/mongo.png">SAVED ARTICLES</button>
 		</div>
-		  <div id="display">
-		    <h2>THIS IS WHERE THE ARTICLE DATA WILL POPULATE.</h2>
-		  </div>
+    <div class="container">
+      <div class="row">
+		    <div id="display" class="col-sm-5">
+		      <h2>ARTICLES</h2>
+          <hr>
+		    </div>
+        <div id="comments" class="col-sm-5">
+          <h2>COMMENTS</h2>
+          <hr>
+        </div>
+      </div>
+    </div>
 
-    <!--   <div id="commentModal" class="modal fade" role="dialog">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">COMMENTS</h4>
-            </div>
-            <div class="modal-body">
-              <p>COMMENTS GO HERE.</p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
+    <!-- <div id="commentModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">COMMENTS</h4>
+          </div>
+          <div class="modal-body">
+           <p>Comments will go here.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
+    </div>
  -->
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+ <script src="app.js"></script>
   </body>
-
-  <script src="app.js"></script>
- </html>
+</html>
