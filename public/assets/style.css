@@ -21,12 +21,24 @@ p {
 	margin: 10px;
     padding: 10px;
     font-size: 15px;
+    height:300px;
+    width:300px;
+    overflow:auto;
 }
 
 #comments {
     margin: 10px;
     padding: 10px;
     font-size: 15px;
+    text-align: center;
+}
+
+h3 {
+    text-decoration: underline;
+}
+
+#delCommentBtn {
+    padding: none;
 }
 
 h2 {
@@ -36,5 +48,10 @@ h2 {
 
 .title {
     font-weight: bold;
+}
+
+#saveBtn, #unSaveBtn {
+    font-size: 10px;
+    margin: 2px;
 }
 

@@ -1,34 +1,73 @@
 //get articles from db as JSON
-$("#scrapeBtn").on("click", function() {
+$("#displayBtn").on("click", function() {
   $.getJSON("/articles", function(data) {
     for (var i = 0; i <data.length; i++) {
     // Display the information on the browser
-    $("#display").append("<p class='title' data-id='" + data[i]._id + "'>" + data[i].title + "</p>" + "<p class='link'>" + data[i].link + "</p>" + "<button id='saveBtn' class='btn btn-primary' role='button'>SAVE</button>" + " " + "<button id='commentBtn' class='btn btn-primary' role='button'>COMMENT</button>");
+    $("#display").append(`<p data-id='${data[i]._id}' class='title'>${data[i].title}</p> <p class='link'>${data[i].link}</p><button class='btn btn-primary' data-toggle="toggle" id='saveBtn' data-id='${data[i]._id}'> SAVE</button><button class='btn btn-primary' data-toggle="toggle" id='unSaveBtn' data-id='${data[i]._id}'> UNSAVE</label>`);
     }
   });
   //console.log("clicked");
 });
 
+$("#scrapeBtn").on("click", function() {
+  $.getJSON("/scrape"), function() {
+    console.log("contents scraped");
+  }
+});
 // $("#savedArticlesBtn").click(function(){
 //     $("#savedDisplay").html("<h2>YOUR SAVED ARTICLES</h2>");
 // });
 
 $(document).on("click", "#saveBtn", function() {
-  console.log("clicked");
+  //console.log("clicked");
   var thisId = $(this).attr("data-id");
+  console.log(thisId);
   $.ajax({
-    method: "GET",
-    url: "/articles/" + thisId
-  })
-  .then(function(data) {
-  $("#savedDisplay").append("<p class='title' data-id='" + data[i]._id + "'>" + data[i].title + "</p>" + "<p class='link'>" + data[i].link + "</p>" + "<button id='comment' class='btn btn-primary' data-toggle='modal' data-target='#commentModal' role='button'>COMMENT</button>");
+    method: "POST",
+    url: "/save/" + thisId,
+    success: function(data){
+      console.log("article saved");
+      //if successful then make THIS buttongreen and change text to saved with a check mark glyphicon
+    },
+    error: function(error){
+      console.log(error);
+      //if there is an error make this button red (for 3 seconds) and say next to it "there was an error"
+    }
   });
 });
 
+//mark article as unsaved
+$(document).on("click", "#unSaveBtn", function() {
+  console.log("clicked");
+  var thisId = $(this).attr("data-id");
+  console.log(thisId);
+  $.ajax({
+    method: "GET",
+    url: "/unsave/" + thisId,
+    success: function(data){
+      console.log("article removed from saved");
+      //if successful then make THIS buttongreen and change text to saved with a check mark glyphicon
+    },
+    error: function(error){
+      console.log(error);
+      //if there is an error make this button red (for 3 seconds) and say next to it "there was an error"
+    }
+  });
+});
+
+function getSaved() {
+  $("#savedDisplay").empty(); 
+  $.getJSON("/saved")
+  .then(function(data) {
+    for (var i = 0; i < data.length; i++) {
+      $("#savedDisplay").append("<p class='title' data-id='" + data[i]._id + "'>" + data[i].title + "</p>" + "<p class='link'>" + data[i].link + "</p>" + "<button id='comment' class='btn btn-primary' role='button'>COMMENT</button>");
+    };
+  });
+};
+
 $(document).on("click", "p", function() {
-  // $("#commentModal").modal("show")
-  // Empty the notes from the comment section
- // $("#comments").empty();
+    // Empty the notes from the comment section
+  $("#comments").empty();
   // Save the id from the p tag
   var thisId = $(this).attr("data-id");
   // Now make an ajax call for the Article
@@ -38,20 +77,20 @@ $(document).on("click", "p", function() {
   })
   .then(function(data) {
       console.log(data);
-      $("#comments").append("<h3>COMMENTS</h3>" + "<hr>");
+      $("#comments").append("<h2>ADD A COMMENT</h2>" + "<hr>");
       // The title of the article
       $("#comments").append("<h3>" + data.title + "</h3>");
       // An input to enter a new title
-      $("#comments").append("<input id='titleinput' name='title' >");
+      $("#comments").append("<input id='titleinput' placeholder='TITLE' name='title' >"  + "<br>" + "<br>");
       // A textarea to add a new note body
-      $("#comments").append("<textarea id='bodyinput' name='body'></textarea>");
+      $("#comments").append("<textarea id='bodyinput' placeholder='COMMENT' name='body'></textarea>"  + "<br>" + "<br>");
       // A button to submit a new note, with the id of the article saved to it
-      $("#comments").append("<button data-id='" + data._id + "' id='savecomment'>SAVE COMMENT</button>");
+      $("#comments").append("<button class='btn btn-primary' data-id='" + data._id + "' id='savecomment'>SAVE COMMENT</button>");
 
       // If there's a note in the article
       if (data.comment) {
         // Place the title of the note in the title input
-        //$("#titleinput").val(data.comment.title);
+        $("#titleinput").val(data.comment.title);
         // Place the body of the note in the body textarea
         $("#bodyinput").val(data.comment.body);
       }
@@ -77,10 +116,33 @@ $(document).on("click", "#savecomment", function() {
       // Log the response
       console.log(data);
       // Empty the notes section
-      $("#comments").empty();
+      
     });
-
+  $("#comments").empty();
   $("#titleinput").val("");
   $("#bodyinput").val("");
 });
 
+$("#viewCommentsBtn").on("click", function() {
+  $("#comments").empty();
+  $.getJSON("/comments", function(data) {
+    for (var i = 0; i <data.length; i++) {
+    // Display the information on the browser
+    $("#comments").append("<h3>" + data[i].title + "</h3>" + "<p>" + data[i].body + "</p>" + "<button id='delCommentBtn' data-id='" + data[i]._id + "' class='btn btn-primary' >x</button>" + "<hr>"  + "<br>");
+    }
+  });
+  //console.log("clicked");
+});
+
+//delete a comment from the display and db
+$(document).on("click", "#delCommentBtn", function() {
+  var thisId = $(this).attr("data-id");
+  $.ajax({
+    type: "DELETE",
+    url: "/deletecomment/:id" + thisId,
+  });
+  $("#comments").remove(thisId);
+  console.log("clicked")
+});
+
+getSaved();
