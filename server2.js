@@ -44,7 +44,6 @@ app.get("/scrape", function(req, res) {
     // Then, we load that into cheerio and save it to $ for a shorthand selector
     var $ = cheerio.load(response.data);
     
-    // Now, we grab every h2 within an article tag, and do the following:
     $("h1.entry-title").each(function(i, element) {
       var result = {};
       result.title = $(this).children("a").text();
@@ -52,15 +51,12 @@ app.get("/scrape", function(req, res) {
       saved: false;
       db.Article.create(result)
         .then(function(dbArticle) {
-          // View the added result in the console
           console.log(dbArticle);
         })
         .catch(function(err) {
-          // If an error occurred, send it to the client
           return (err);
         });
     });
-// If we were able to successfully scrape and save an Article, send a message to the client
     res.send("Here are your articles.");
   });
 });
@@ -69,7 +65,6 @@ app.get("/scrape", function(req, res) {
 app.get("/articles", function(req, res) {
   db.Article.find({})
     .then(function(dbArticle) {
-      // If we were able to successfully find Articles, send them back to the client
       res.json(dbArticle);
     })
     .catch(function(err) {
@@ -89,7 +84,7 @@ app.get("/save/:id", function(req, res) {
       if (error) {
         console.log(error);
       }
-      else {
+      else { //does not show as saved in db and does not give error
         console.log(id + " is saved");
   res.send("itworked!");
       }
@@ -98,8 +93,7 @@ app.get("/save/:id", function(req, res) {
 
 //mark an article as unsaved
 app.get("/unsave/:id", function(req, res) {
-  // Go into the mongo collection, and find all docs where "read" is false
-  db.Article.update(
+  db.Article.findOneAndUpdate(
     { 
       _id: req.params.id
     },
@@ -109,44 +103,36 @@ app.get("/unsave/:id", function(req, res) {
       }
     }, 
     function(error, found) {
-    // Show any errors
     if (error) {
       console.log(error);
     }
-    else {
-      // Otherwise, send the books we found to the browser as a json
+    else { //does not show as unsaved in database and does not give error
       console.log(found);
       res.json(found);
     }
   });
 });
 
-// Go into the Article collection, and find all articles where "saved" is true
+// find all articles where "saved" is true
 app.get("/saved/", function(req, res) {
   db.Article.find({ saved: true }, function(error, found) {
-    // Show any errors
     if (error) {
       console.log(error);
-    }
+    }//does not get saved articles, likely because they aren't getting marked as saved
     else {
-      // Otherwise, send the articles we found to the browser as a json
       res.json(found);
     }
   });
 });
 
-// Route for grabbing a specific Article by id, populate it with it's note
+// Article by id, populate it with it's comments
 app.get("/articles/:id", function(req, res) {
-  // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
   db.Article.findOne({ _id: req.params.id })
-    // ..and populate all of the notes associated with it
     .populate("comment")
     .then(function(dbArticle) {
-      // If we were able to successfully find an Article with the given id, send it back to the client
       res.json(dbArticle);
     })
     .catch(function(err) {
-      // If an error occurred, send it to the client
       return (err);
     });
 });
@@ -156,17 +142,12 @@ app.post("/articles/:id", function(req, res) {
   // Create a new comment and pass the req.body to the entry
   db.Comment.create(req.body)
     .then(function(dbComment) {
-      // If a Note was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new Note
-      // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
-      // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
       return db.Article.findOneAndUpdate({ _id: req.params.id }, { comment: dbComment._id }, { new: true });
     })
     .then(function(dbArticle) {
-      // If we were able to successfully update an Article, send it back to the client
       res.json(dbArticle);
     })
     .catch(function(err) {
-      // If an error occurred, send it to the client
       return (err);
     });
 });
@@ -174,7 +155,6 @@ app.post("/articles/:id", function(req, res) {
 app.get("/comments", function(req, res) {
   db.Comment.find({})
     .then(function(dbArticle) {
-      // If we were able to successfully find Articles, send them back to the client
       res.json(dbArticle);
     })
     .catch(function(err) {
@@ -184,14 +164,11 @@ app.get("/comments", function(req, res) {
 
 //delete a comment
 app.get("/deletecomment/:id", function(req, res) {
-  // Go into the mongo collection, and find all docs where "read" is false
   db.Comment.findOneAndRemove({ _id: req.params.id }, function(error, found) {
-    // Show any errors
     if (error) {
       console.log(error);
     }
-    else {
-      // Otherwise, send the books we found to the browser as a json
+    else { //does not delete from database
       console.log("comment deleted");
     }
   });
