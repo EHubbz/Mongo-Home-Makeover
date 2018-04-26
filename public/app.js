@@ -3,7 +3,7 @@ $("#displayBtn").on("click", function() {
   $.getJSON("/articles", function(data) {
     for (var i = 0; i <data.length; i++) {
     // Display the information on the browser
-    $("#display").append(`<p data-id='${data[i]._id}' class='title'>${data[i].title}</p> <p class='link'>${data[i].link}</p><button class='btn btn-primary' data-toggle="toggle" id='saveBtn' data-id='${data[i]._id}'> SAVE</button><button class='btn btn-primary' data-toggle="toggle" id='unSaveBtn' data-id='${data[i]._id}'> UNSAVE</label>`);
+    $("#display").append(`<p data-id='${data[i]._id}' class='title'>${data[i].title}</p> <p class='link'>${data[i].link}</p><button class='btn btn-primary' data-toggle="toggle" id='saveBtn' data-id='${data[i]._id}'> SAVE</button>>`);
     }
   });
 });
@@ -19,16 +19,12 @@ $(document).on("click", "#saveBtn", function() {
   var thisId = $(this).attr("data-id");
   console.log(thisId);
   $.ajax({
-    method: "POST",
-    url: "/save/" + thisId,
-    success: function(data){
-      console.log("article saved");
-      //logs article saved but does not reflect in db
-    },
-    error: function(error){
-      console.log(error);
-      //but does not give error
-    }
+    type: "GET",
+    url: "/save/" + thisId
+    })
+  
+.then(function(data) {
+  console.log("article" + thisId + "saved");
   });
 });
 
@@ -38,28 +34,25 @@ $(document).on("click", "#unSaveBtn", function() {
   var thisId = $(this).attr("data-id");
   console.log(thisId);
   $.ajax({
-    method: "GET",
-    url: "/unsave/" + thisId,
-    success: function(data){
-      console.log("article removed from saved");
-      //logs as unsaved but does not reflect in db
-    },
-    error: function(error){
-      console.log(error);
-      //but gives no error
-    }
+    type: "GET",
+    url: "/unsave/" + thisId
+  })
+    .then(function(data) {
+  console.log("article" + thisId + "unsaved");
   });
 });
 
-function getSaved() {
-  $("#savedDisplay").empty(); 
-  $.getJSON("/saved")
-  .then(function(data) {
+$(document).on("click", "#savedArticlesBtn", function() {
+  $("#display").empty();
+  console.log("clicked");
+
+  $.getJSON("/saved/", function(data) {
     for (var i = 0; i < data.length; i++) {
-      $("#savedDisplay").append("<p class='title' data-id='" + data[i]._id + "'>" + data[i].title + "</p>" + "<p class='link'>" + data[i].link + "</p>" + "<button id='comment' class='btn btn-primary' role='button'>COMMENT</button>");
+      $("#display").append("<p class='title' data-id='" + data[i]._id + "'>" + data[i].title + "</p>" + "<p class='link'>" + data[i].link + "</p>" + "<button class='btn btn-primary' data-toggle='toggle' id='unSaveBtn' data-id='" + data[i]._id + "'> UNSAVE</button>");
     };
+    console.log("clicked");
   });
-}; //does not display saved, likely because they aren't getting saved initially
+}); // click works all throughout function but does not display saved info, likely because they aren't getting saved initially
 
 $(document).on("click", "p", function() {
     // Empty the notes from the comment section
@@ -126,13 +119,13 @@ $("#viewCommentsBtn").on("click", function() {
 $(document).on("click", "#delCommentBtn", function() {
   var thisId = $(this).attr("data-id");
   $.ajax({
-    type: "DELETE",
+    type: "GET",
     url: "/deletecomment/:id" + thisId,
   });
-  $("#comments").remove(thisId); 
-  //deletes from display but deletes all content :(
-  //and does not yet delete from database :(
-  console.log("clicked")
+  $(this).remove(); 
+  //deletes from display but deletes all content 
+  //and does not yet delete from database 
+  console.log("clicked");
 });
 
-getSaved();
+//getSaved();

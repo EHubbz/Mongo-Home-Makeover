@@ -48,7 +48,8 @@ app.get("/scrape", function(req, res) {
       var result = {};
       result.title = $(this).children("a").text();
       result.link = $(this).children("a").attr("href");
-      saved: false;
+      console.log(result);
+      console.log("I'm not crazy");
       db.Article.create(result)
         .then(function(dbArticle) {
           console.log(dbArticle);
@@ -75,11 +76,13 @@ app.get("/articles", function(req, res) {
 // Mark an article as having been saved
 app.get("/save/:id", function(req, res) {
   var id = req.params.id;
-  db.Article.update(
-    { _id: req.params.id
+  db.Article.findOneAndUpdate(
+    { 
+      _id: req.params.id
     }, 
-    { $set: {
-      saved: true }
+    { 
+      $set: {
+        saved: true }
     }, function(error, found) {
       if (error) {
         console.log(error);
@@ -93,6 +96,7 @@ app.get("/save/:id", function(req, res) {
 
 //mark an article as unsaved
 app.get("/unsave/:id", function(req, res) {
+  var id = req.params.id;
   db.Article.findOneAndUpdate(
     { 
       _id: req.params.id
@@ -107,7 +111,7 @@ app.get("/unsave/:id", function(req, res) {
       console.log(error);
     }
     else { //does not show as unsaved in database and does not give error
-      console.log(found);
+      console.log(unsaved);
       res.json(found);
     }
   });
@@ -115,10 +119,24 @@ app.get("/unsave/:id", function(req, res) {
 
 // find all articles where "saved" is true
 app.get("/saved/", function(req, res) {
-  db.Article.find({ saved: true }, function(error, found) {
+  console.log("=======saved");
+  db.Article.find({saved: true }, function(error, found) {
     if (error) {
       console.log(error);
-    }//does not get saved articles, likely because they aren't getting marked as saved
+    }
+    else {
+      res.json(found);
+    }
+  });
+});
+
+// find all articles where "unsaved" is true
+app.get("/unsaved/", function(req, res) {
+  console.log("=======unsaved");
+  db.Article.find({saved: false }, function(error, found) {
+    if (error) {
+      console.log(error);
+    }
     else {
       res.json(found);
     }
@@ -158,7 +176,7 @@ app.get("/comments", function(req, res) {
       res.json(dbArticle);
     })
     .catch(function(err) {
-      return (err);
+      res.json(err);
     });
 });
 
