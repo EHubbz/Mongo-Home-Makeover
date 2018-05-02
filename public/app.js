@@ -1,19 +1,22 @@
+//scrape articles from Scandinavian Standard website
+$("#scrapeBtn").on("click", function () {
+  $.getJSON("/scrape"), function () {
+    console.log("contents scraped");
+  }
+});
+
 //get articles from db as JSON
 $("#displayBtn").on("click", function() {
+  $("#display").empty();
   $.getJSON("/articles", function(data) {
+    $("#display").append("<h2>ARTICLES</h2>" + "<hr>");
     for (var i = 0; i <data.length; i++) {
     // Display the information on the browser
     $("#display").append(`<p data-id='${data[i]._id}' class='title'>${data[i].title}</p> <p class='link'>${data[i].link}</p><button class='btn btn-primary' data-toggle="toggle" id='saveBtn' data-id='${data[i]._id}'> SAVE</button>>`);
     }
   });
 });
-
-$("#scrapeBtn").on("click", function() {
-  $.getJSON("/scrape"), function() {
-    console.log("contents scraped");
-  }
-});
-
+//mark articles saved in db
 $(document).on("click", "#saveBtn", function() {
   //console.log("clicked");
   var thisId = $(this).attr("data-id");
@@ -28,7 +31,7 @@ $(document).on("click", "#saveBtn", function() {
   });
 });
 
-//mark article as unsaved
+//mark article as unsaved in db
 $(document).on("click", "#unSaveBtn", function() {
   console.log("clicked");
   var thisId = $(this).attr("data-id");
@@ -41,22 +44,22 @@ $(document).on("click", "#unSaveBtn", function() {
   console.log("article" + thisId + "unsaved");
   });
 });
-
+//view all saved articles
 $(document).on("click", "#savedArticlesBtn", function() {
   $("#display").empty();
   console.log("clicked");
-
   $.getJSON("/saved/", function(data) {
+    $("#display").append("<h2>YOUR SAVED ARTICLES</h2>" + "<hr>");
     for (var i = 0; i < data.length; i++) {
-      $("#display").append("<p class='title' data-id='" + data[i]._id + "'>" + data[i].title + "</p>" + "<p class='link'>" + data[i].link + "</p>" + "<button class='btn btn-primary' data-toggle='toggle' id='unSaveBtn' data-id='" + data[i]._id + "'> UNSAVE</button>");
+      $("#display").append("<div data-id='" + data[i]._id + "'>" + "<p class='title' data-id='" + data[i]._id + "'>" + data[i].title + "</p>" + "<p class='link'>" + data[i].link + "</p>" + "<button class='btn btn-primary' data-toggle='toggle' id='unSaveBtn' data-id='" + data[i]._id + "'> UNSAVE</button></div>");
     };
     console.log("clicked");
   });
-}); // click works all throughout function but does not display saved info, likely because they aren't getting saved initially
-
+}); 
+//click on scraped link to leave a comment
 $(document).on("click", "p", function() {
     // Empty the notes from the comment section
-  $("#comments").empty();
+  $("#comments2").empty();
   // Save the id from the p tag
   var thisId = $(this).attr("data-id");
   $.ajax({
@@ -70,9 +73,9 @@ $(document).on("click", "p", function() {
       $("#comments").append("<h3>" + data.title + "</h3>");
       // An input to enter a new title
       $("#comments").append("<input id='titleinput' placeholder='TITLE' name='title' >"  + "<br>" + "<br>");
-      // A textarea to add a new note body
+      // A textarea to add a new comment body
       $("#comments").append("<textarea id='bodyinput' placeholder='COMMENT' name='body'></textarea>"  + "<br>" + "<br>");
-      // A button to submit a new note, with the id of the article saved to it
+      // A button to submit a new comment, with the id of the article saved to it
       $("#comments").append("<button class='btn btn-primary' data-id='" + data._id + "' id='savecomment'>SAVE COMMENT</button>");
 
       if (data.comment) {
@@ -99,8 +102,7 @@ $(document).on("click", "#savecomment", function() {
   })
   .then(function(data) {
       console.log(data);
-      // Empties the notes section
-    });
+  });
   $("#titleinput").val("");
   $("#bodyinput").val("");
   $("#comments").empty();
@@ -109,8 +111,9 @@ $(document).on("click", "#savecomment", function() {
 $("#viewCommentsBtn").on("click", function() {
   $("#comments").empty();
   $.getJSON("/comments", function(data) {
+    $("#comments").append("<h2>COMMENTS</h2>" + "<hr>");
     for (var i = 0; i <data.length; i++) {
-    $("#comments").append("<h3>" + data[i].title + "</h3>" + "<p>" + data[i].body + "</p>" + "<button id='delCommentBtn' data-id='" + data[i]._id + "' class='btn btn-primary' >x</button>" + "<hr>"  + "<br>");
+      $("#comments").append("<div class='comment' data-id='" + data[i]._id + "'>" + "<h3>" + data[i].title + "</h3>" + "<p>" + data[i].body + "</p>" + "<button id='delCommentBtn' data-id='" + data[i]._id + "' class='btn btn-primary' >x</button>" + "<hr>" + "</div>" + "<br>");
     }
   });
 });
@@ -122,7 +125,9 @@ $(document).on("click", "#delCommentBtn", function() {
     type: "GET",
     url: "/deletecomment/:id" + thisId,
   });
-  $(this).remove(); 
+  $(this).data("data[i]._id").remove(); 
+ // $(this).data('i') === "product_id"
+//}).remove();
   //deletes from display but deletes all content 
   //and does not yet delete from database 
   console.log("clicked");
