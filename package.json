@@ -19,6 +19,7 @@
   "homepage": "https://github.com/EHubbz/Mongo-Home-Makeover#readme",
   "dependencies": {
     "express": "^4.15.4",
-    "mongoose": "^5.0.11"
+    "mongoose": "^5.0.11",
+    "mongojs": "^2.5.0"
   }
 }
