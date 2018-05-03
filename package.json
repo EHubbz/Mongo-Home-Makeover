@@ -16,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/EHubbz/Mongo-Home-Makeover/issues"
   },
-  "homepage": "https://github.com/EHubbz/Mongo-Home-Makeover#readme"
+  "homepage": "https://github.com/EHubbz/Mongo-Home-Makeover#readme",
+  "dependencies": {
+    "express": "^4.15.4",
+    "mongoose": "^5.0.11"
+  }
 }

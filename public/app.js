@@ -12,7 +12,7 @@ $("#displayBtn").on("click", function() {
     $("#display").append("<h2>ARTICLES</h2>" + "<hr>");
     for (var i = 0; i <data.length; i++) {
     // Display the information on the browser
-    $("#display").append(`<p data-id='${data[i]._id}' class='title'>${data[i].title}</p> <p class='link'>${data[i].link}</p><button class='btn btn-primary' data-toggle="toggle" id='saveBtn' data-id='${data[i]._id}'> SAVE</button>>`);
+    $("#display").append(`<p data-id='${data[i]._id}' class='title'>${data[i].title}</p> <p class='link'>${data[i].link}</p><button class='btn btn-primary' data-toggle="toggle" id='saveBtn' data-id='${data[i]._id}'> SAVE</button>`);
     }
   });
 });
@@ -86,7 +86,7 @@ $(document).on("click", "p", function() {
       }
     });
 });
-
+//saves comment with associated article
 $(document).on("click", "#savecomment", function() {
   // Grabs the id associated with the article from the submit button
   var thisId = $(this).attr("data-id");
@@ -125,12 +125,9 @@ $(document).on("click", "#delCommentBtn", function() {
     type: "GET",
     url: "/deletecomment/:id" + thisId,
   });
-  $(this).data("data[i]._id").remove(); 
- // $(this).data('i') === "product_id"
-//}).remove();
+  $(`#comments.${$(this).data("data[i]._id")}`).remove();
   //deletes from display but deletes all content 
   //and does not yet delete from database 
   console.log("clicked");
 });
 
-//getSaved();
