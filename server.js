@@ -1,125 +1,197 @@
-// Dependencies
 var express = require("express");
-var mongojs = require("mongojs");
-// Require request and cheerio. This makes the scraping possible
-var request = require("request");
-var cheerio = require("cheerio");
 var bodyParser = require("body-parser");
 var logger = require("morgan");
-var axios = require("axios");
-var db = require("./models.js");
 var mongoose = require("mongoose");
+var exphbs = require("express-handlebars");
+var path = require("path");
+// scraping tools
+var axios = require("axios");
+var cheerio = require("cheerio");
+// Require all models
+var db = require("./models");
+
+var PORT = 8080;
 // Initialize Express
 var app = express();
-// Static (public) folder for web app
-app.use(express.static("public"));
-// Database configuration
-var databaseUrl = "articles";
-var collections = ["scrapedData"];
-// Hook mongojs configuration to the db variable
-var db = mongojs(databaseUrl, collections);
-mongoose.connect("mongodb://localhost/articles");
-app.use(bodyParser.urlencoded({ extended: true }));
+app.set("views", path.join(__dirname, "views"));
+app.engine("handlebars", exphbs ({defaultLayout: "main"}));
+app.set("view engine", "handlebars");
+// Use morgan logger for logging requests
 app.use(logger("dev"));
+// Use body-parser for handling form submissions
+app.use(bodyParser.urlencoded({ extended: true }));
+// Use express.static to serve the public folder as a static directory
+app.use(express.static("public"));
 
+// Connect to the Mongo DB
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/scrapedData";
+mongoose.Promise = Promise;
+mongoose.connect("mongodb://localhost/scrapedData");
+mongoose.connect(MONGODB_URI, {
+ // useMongoClient: true
+});
 
-
-// db.on("error", function(error) {
-//   console.log("Database Error:", error);
-// });
-
+// Routes
 app.get("/", function(req, res) {
- res.sendFile(path.join(__dirname, "index.html"));
+  res.render("index", {
+    // res.preventDefault();
+  });
 });
-
+// A GET route for scraping the scandinavian standard website
 app.get("/scrape", function(req, res) {
-  // Make a request from the website
-  request("https://domino.com/content/design/before-after", function(error, response, html) {
-    // Load the html body from request into cheerio
-    var $ = cheerio.load(html);
-    var baseUrl = "https://domino.com";
-    // For each element 
-    $("h2.truncate").each(function(i, element) {
-      // Save the text and href of each link enclosed in the current element
-      var title = $(this).children("a").text();
-      var link = $(this).children("a").attr("href");
-      var modLink = baseUrl + link;
-      console.log(modLink);
-      // If this found element had both a title and a link
-      // Insert the data in the scrapedData db
-        db.scrapedData.insert({
-          title: title,
-          link: modLink
-        },
-        function(err, inserted) {
-          if (err) {
-            // Log the error if one is encountered during the query
-            console.log(err);
-          }
-          else {
-            // Otherwise, log the inserted data
-            console.log(inserted);
-          }
+  // First, we grab the body of the html with request
+  axios.get("http://www.scandinaviastandard.com/category/design/").then(function(response) {
+    // Then, we load that into cheerio and save it to $ for a shorthand selector
+    var $ = cheerio.load(response.data);
+    
+    $("h1.entry-title").each(function(i, element) {
+      var result = {};
+      result.title = $(this).children("a").text();
+      result.link = $(this).children("a").attr("href");
+      console.log(result);
+      console.log("I'm not crazy");
+      db.Article.create(result)
+        .then(function(dbArticle) {
+          console.log(dbArticle);
+        })
+        .catch(function(err) {
+          return (err);
         });
-      });
     });
-  // Send a "Scrape Complete" message to the browser
-  res.send("complete");
+    res.send("Here are your articles.");
+  });
 });
 
-// Retrieve data from the db
+// Route for getting all Articles from the db
 app.get("/articles", function(req, res) {
-  // Find all results from the scrapedData collection in the db
-  db.scrapedData.find({}, function(error, found) {
-  
-    // Throw any errors to the console
+  db.Article.find({})
+    .then(function(dbArticle) {
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
+      return (err);
+    });
+});
+
+// Mark an article as having been saved
+app.get("/save/:id", function(req, res) {
+  var id = req.params.id;
+  db.Article.findOneAndUpdate(
+    { 
+      _id: req.params.id
+    }, 
+    { 
+      $set: {
+        saved: true }
+    }, function(error, found) {
+      if (error) {
+        console.log(error);
+      }
+      else { //does not show as saved in db and does not give error
+        console.log(id + " is saved");
+  res.send("itworked!");
+      }
+  });
+});
+
+//mark an article as unsaved
+app.get("/unsave/:id", function(req, res) {
+  var id = req.params.id;
+  db.Article.findOneAndUpdate(
+    { 
+      _id: req.params.id
+    },
+    { 
+      $set: {
+        saved: false 
+      }
+    }, 
+    function(error, found) {
     if (error) {
       console.log(error);
     }
-    // If there are no errors, send the data to the browser as json
+    else { //does not show as unsaved in database and does not give error
+      console.log(unsaved);
+      res.json(found);
+    }
+  });
+});
+
+// find all articles where "saved" is true
+app.get("/saved/", function(req, res) {
+  console.log("=======saved");
+  db.Article.find({saved: true }, function(error, found) {
+    if (error) {
+      console.log(error);
+    }
     else {
       res.json(found);
     }
   });
 });
 
-// Route for grabbing a specific Article by id, populate it with it's comment
+// find all articles where "unsaved" is true
+app.get("/unsaved/", function(req, res) {
+  console.log("=======unsaved");
+  db.Article.find({saved: false }, function(error, found) {
+    if (error) {
+      console.log(error);
+    }
+    else {
+      res.json(found);
+    }
+  });
+});
+
+// Article by id, populate it with it's comments
 app.get("/articles/:id", function(req, res) {
-  // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
-  db.scrapedData.findOne({ _id: req.params.id })
-    // ..and populate all of the comments associated with it
+  db.Article.findOne({ _id: req.params.id })
     .populate("comment")
-    .then(function(dbscrapedData) {
-      // If we were able to successfully find an Article with the given id, send it back to the client
-      res.json(dbscrapedData);
+    .then(function(dbArticle) {
+      res.json(dbArticle);
     })
     .catch(function(err) {
-      // If an error occurred, send it to the client
-      res.json(err);
+      return (err);
     });
 });
 
-// Route for saving/updating an Article's associated Note
+// Route for saving/updating an Article's associated Comment
 app.post("/articles/:id", function(req, res) {
-  // Create a new note and pass the req.body to the entry
+  // Create a new comment and pass the req.body to the entry
   db.Comment.create(req.body)
     .then(function(dbComment) {
-      // If a Note was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new Note
-      // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
-      // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
-      return db.scrapedData.findOneAndUpdate({ _id: req.params.id }, { comment: dbComment._id }, { new: true });
+      return db.Article.findOneAndUpdate({ _id: req.params.id }, { comment: dbComment._id }, { new: true });
     })
-    .then(function(dbscrapedData) {
-      // If we were able to successfully update an Article, send it back to the client
-      res.json(dbscrapedData);
+    .then(function(dbArticle) {
+      res.json(dbArticle);
     })
     .catch(function(err) {
-      // If an error occurred, send it to the client
+      return (err);
+    });
+});
+//get all comments from bd and display
+app.get("/comments", function(req, res) {
+  db.Comment.find({})
+    .then(function(dbArticle) {
+      res.json(dbArticle);
+    })
+    .catch(function(err) {
       res.json(err);
     });
 });
 
-// Listen on port 3000
-app.listen(8080, function() {
-  console.log("App connected: port 8080");
+//delete a comment
+app.get("/deletecomment/:id", function(req, res) {
+  db.Comment.findOneAndRemove({ _id: req.params.id }, function(error, found) {
+    if (error) {
+      console.log(error);
+    }
+    else { //does not delete from database
+      console.log("comment deleted");
+    }
+  });
+});
+// Start the server
+app.listen(PORT, function() {
+  console.log("App running on port " + PORT + "!");
 });
