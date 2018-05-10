@@ -1,6 +1,8 @@
 //scrape articles from Scandinavian Standard website
 $("#scrapeBtn").on("click", function () {
   $.getJSON("/scrape"), function () {
+    $("#display").empty();
+    $("#display").append("<p>ARTICLES SCRAPED</p>");
     console.log("contents scraped");
   }
 });
