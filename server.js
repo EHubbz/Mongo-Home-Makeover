@@ -26,9 +26,9 @@ app.use(express.static("public"));
 // Connect to the Mongo DB
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/scrapedData";
 mongoose.Promise = Promise;
-mongoose.connect("mongodb://localhost/scrapedData");
+// mongoose.connect("mongodb://localhost/scrapedData");
 mongoose.connect(MONGODB_URI, {
- // useMongoClient: true
+ useMongoClient: true
 });
 
 // Routes
